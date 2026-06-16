@@ -1,0 +1,7 @@
+﻿.env
+configlogs.txt
+logs.txt
+PublishLogs.txt
+*.pyc
+__pycache__/
+node_modules/

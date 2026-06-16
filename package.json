@@ -1,0 +1,9 @@
+{
+  "name": "libre-claude",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "LibreClaude - Multi-AI chat interface",
+  "scripts": {},
+  "dependencies": {}
+}

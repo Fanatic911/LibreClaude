@@ -1,0 +1,39 @@
+# LibreClaude v1.0.0 
+
+Welcome to the official **v1.0.0** stable release of **LibreClaude**! 
+
+LibreClaude is a fully unrestricted, free, and open-source AI platform designed to put the power of cutting-edge artificial intelligence into everyone's hands. By bringing together the best models from top infrastructures, LibreClaude removes traditional subscription barriers, token limitations, and paywalls.
+
+Whether you are debugging code, drafting complex documentation, or building presentations, LibreClaude 1.0 has a dedicated architecture ready for the task.
+
+---
+
+## 🌟 What's New in v1.0.0
+
+### 1. Dual-Infrastructure AI Routing
+We have integrated two powerful backends to ensure high availability, redundancy, and specialized performance:
+* **Groq Infrastructure:** High-speed, low-latency models for instant workflows.
+* **GitHub Infrastructure:** Heavyweight, state-of-the-art reasoning and coding models.
+
+### 2. An Unparalleled Model Roster
+Switch seamlessly between a massive selection of models depending on your technical needs:
+* **Advanced Reasoning:** DeepSeek R1, OpenAI o1-mini, and GPT-OSS 120B for multi-step logic and complex problem-solving.
+* **Heavyweight Coding:** Codestral, DeepSeek V3, and GPT-4.1 for professional-grade software development.
+* **Extreme Scale:** Meta Llama 3.1 405B for massive datasets and deep comprehension.
+* **Versatility & Daily Tasks:** GPT-4o, Grok 3, Mistral Large, and Llama 3.3 70B for text generation, letters, and structuring presentations.
+* **Speed & Efficiency:** Llama 3.1 8B, GPT-4o mini, and Phi-4 for lightweight and instantaneous responses.
+
+### 3. Absolute Freedom
+* **100% Free:** No premium tiers, no locked features.
+* **No Token Limits:** Code, write, and prompt continuously without worrying about rate limits or quotas.
+
+---
+
+## 📬 Feedback & Community Support
+
+This is just the beginning of the LibreClaude ecosystem. We rely on your feedback to improve the platform, optimize routing, and expand model capabilities.
+
+For bug reports, feature requests, or project suggestions, reach out to us at:
+📧 **Contact@libreclaude.xyz**
+
+Thank you for being part of the open-source AI revolution!
