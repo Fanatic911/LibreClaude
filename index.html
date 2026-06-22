@@ -148,6 +148,13 @@
                 </div>
                 <div id="onboard-list-groq" class="model-section-list"></div>
               </div>
+              <div class="model-section">
+                <div class="model-section-label">
+                  <span class="provider-badge image">Image</span>
+                  <span class="provider-desc">Free · no limits</span>
+                </div>
+                <div id="onboard-list-image" class="model-section-list"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -263,6 +270,13 @@
                     <span class="provider-desc">Fast inference</span>
                   </div>
                   <div id="list-groq" class="model-section-list"></div>
+                </div>
+                <div class="model-section">
+                  <div class="model-section-label">
+                    <span class="provider-badge image">Image</span>
+                    <span class="provider-desc">Free · no limits</span>
+                  </div>
+                  <div id="list-image" class="model-section-list"></div>
                 </div>
               </div>
             </div>
@@ -491,6 +505,14 @@ const GITHUB_MODELS = [
   { id: 'mistral-ai/Mistral-Large-2411',     label: 'Mistral Large',   sub: 'Advanced reasoning',       provider: 'GitHub' },
   { id: 'microsoft/Phi-4',                   label: 'Phi-4',           sub: 'Compact · smart',          provider: 'GitHub' },
   { id: 'xai/grok-3',                        label: 'Grok 3',          sub: 'xAI · reasoning',          provider: 'GitHub' },
+];
+
+const IMAGE_MODELS = [
+  { id: 'img:flux',         label: 'Flux',         sub: 'High quality · default',  provider: 'Image', badge: 'FREE' },
+  { id: 'img:flux-realism', label: 'Flux Realism', sub: 'Photorealistic',           provider: 'Image' },
+  { id: 'img:flux-anime',   label: 'Flux Anime',   sub: 'Anime & illustration',     provider: 'Image' },
+  { id: 'img:flux-3d',      label: 'Flux 3D',      sub: '3D render style',          provider: 'Image' },
+  { id: 'img:turbo',        label: 'Turbo',        sub: 'Faster generation',        provider: 'Image' },
 ];
 
 const MODEL_KEY = 'lc_model_v1';
@@ -771,13 +793,15 @@ function launchStartTransition() {
 function buildOnboardModelList() {
   const groqEl   = document.getElementById('onboard-list-groq');
   const githubEl = document.getElementById('onboard-list-github');
-  groqEl.innerHTML = ''; githubEl.innerHTML = '';
+  const imageEl  = document.getElementById('onboard-list-image');
+  groqEl.innerHTML = ''; githubEl.innerHTML = ''; imageEl.innerHTML = '';
   GITHUB_MODELS.forEach(m => githubEl.appendChild(makeOnboardOpt(m)));
   GROQ_MODELS.forEach(m   => groqEl.appendChild(makeOnboardOpt(m)));
+  IMAGE_MODELS.forEach(m  => imageEl.appendChild(makeOnboardOpt(m)));
 }
 
 function updateOnboardPill() {
-  const all = [...GROQ_MODELS, ...GITHUB_MODELS];
+  const all = [...GROQ_MODELS, ...GITHUB_MODELS, ...IMAGE_MODELS];
   const m = all.find(x => x.id === onboardSelectedModel) || GITHUB_MODELS[0];
   document.getElementById('onboard-pill-name').textContent = m.label;
   document.getElementById('onboard-pill-provider').textContent = m.provider;
@@ -858,8 +882,11 @@ function initSnowfall() {
 function buildModelLists() {
   const groqEl   = document.getElementById('list-groq');
   const githubEl = document.getElementById('list-github');
+  const imageEl  = document.getElementById('list-image');
+  groqEl.innerHTML = ''; githubEl.innerHTML = ''; imageEl.innerHTML = '';
   GROQ_MODELS.forEach(m   => groqEl.appendChild(makeModelOpt(m)));
   GITHUB_MODELS.forEach(m => githubEl.appendChild(makeModelOpt(m)));
+  IMAGE_MODELS.forEach(m  => imageEl.appendChild(makeModelOpt(m)));
 }
 
 function makeModelOpt(m) {
@@ -873,7 +900,7 @@ function makeModelOpt(m) {
 }
 
 function updatePill() {
-  const all = [...GROQ_MODELS, ...GITHUB_MODELS];
+  const all = [...GROQ_MODELS, ...GITHUB_MODELS, ...IMAGE_MODELS];
   const m = all.find(x => x.id === selectedModel) || GITHUB_MODELS[0];
   document.getElementById('pill-name').textContent = m.label;
   document.getElementById('pill-provider').textContent = m.provider;
@@ -1193,6 +1220,13 @@ function copyCode(btn){
   });
 }
 
+function renderMsgRaw(role, htmlContent) {
+  const msgEl = document.getElementById('messages');
+  const row = document.createElement('div'); row.className = 'msg-row ' + role;
+  row.innerHTML = `<div class="msg-ai-wrap"><div class="msg-av-ai"><img src="Icon.png" alt="AI" width="13" height="13" onerror="iconFallback(this)"/></div><div class="msg-bubble ai">${htmlContent}</div></div>`;
+  msgEl.appendChild(row); msgEl.scrollTop = msgEl.scrollHeight;
+}
+
 function renderMsg(role,text,files,save,apiContent){
   if(save===undefined) save=true;
   if(save) saveMsg(role,text,files,apiContent!==undefined?apiContent:text);
@@ -1207,10 +1241,13 @@ function renderMsg(role,text,files,save,apiContent){
   msgEl.appendChild(row); msgEl.scrollTop=msgEl.scrollHeight;
 }
 
-function showTyping(){
+function showTyping(label){
   const msgEl=document.getElementById('messages');
   const row=document.createElement('div'); row.className='msg-row ai'; row.id='typing';
-  row.innerHTML=`<div class="msg-ai-wrap"><div class="msg-av-ai"><img src="Icon.png" alt="AI" width="13" height="13" onerror="iconFallback(this)"/></div><div class="typing"><i></i><i></i><i></i></div></div>`;
+  const inner=label
+    ? `<div class="typing-text">${label}</div>`
+    : `<div class="typing"><i></i><i></i><i></i></div>`;
+  row.innerHTML=`<div class="msg-ai-wrap"><div class="msg-av-ai"><img src="Icon.png" alt="AI" width="13" height="13" onerror="iconFallback(this)"/></div>${inner}</div>`;
   msgEl.appendChild(row); msgEl.scrollTop=msgEl.scrollHeight;
 }
 function rmTyping(){ const t=document.getElementById('typing'); if(t) t.remove(); }
@@ -1375,7 +1412,43 @@ async function sendMessage(){
   const apiContent=buildApiContent(text,files);
   renderMsg('user',text,files,true,apiContent);
   taEl.value=''; taEl.style.height='auto'; refreshSend();
-  isLoading=true; refreshSend(); showTyping();
+  isLoading=true; refreshSend();
+  if(selectedModel.startsWith('img:')) showTyping('Generating image…'); else showTyping();
+
+  if (selectedModel.startsWith('img:')) {
+    try {
+      const imgModel = selectedModel.replace('img:','');
+      const res = await fetch('/api/image',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({prompt:text,model:imgModel,width:1024,height:1024,turnstileToken:tsToken})
+      });
+      if(!res.ok){
+        rmTyping();
+        const e=await res.json().catch(()=>({}));
+        showError(e.error||'Image generation failed.');
+        isLoading=false; refreshSend();
+      } else {
+        const d=await res.json();
+        const img=new Image();
+        img.onload=()=>{
+          rmTyping();
+          const imgHtml=`<div class="gen-image-wrap"><img class="gen-image" src="${d.url}" alt="${esc(d.prompt)}"/><div class="gen-image-prompt">${esc(d.prompt)}</div></div>`;
+          renderMsgRaw('ai',imgHtml);
+          scrollToBottom();
+          isLoading=false; refreshSend();
+        };
+        img.onerror=()=>{
+          rmTyping();
+          showError('Image failed to load. Try again.');
+          isLoading=false; refreshSend();
+        };
+        img.src=d.url;
+      }
+    } catch(err){ rmTyping(); showError('Unable to reach the image server.'); isLoading=false; refreshSend(); }
+    return;
+  }
+
   try {
     const res=await fetch('/api/chat',{
       method:'POST',
@@ -1404,7 +1477,6 @@ async function sendMessage(){
     } else {
       const d=await res.json();
       renderMsg('ai',d.content,[],true);
-      // Auto-scroll to bottom after AI response
       scrollToBottom();
     }
   } catch(err){ rmTyping(); showError('Unable to reach the server. Check your connection.'); }
