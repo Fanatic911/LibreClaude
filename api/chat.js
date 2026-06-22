@@ -1,4 +1,3 @@
-
 import fs   from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -43,7 +42,21 @@ const GROQ_MODEL_MAP = {
   'llama-3.1-8b-instant':    'llama-3.1-8b-instant',
   'openai/gpt-oss-20b':      'gpt-oss-20b',
   'openai/gpt-oss-120b':     'gpt-oss-120b',
+  'qwen/qwen3-32b':          'qwen/qwen3-32b',
 };
+
+// Rate limit / daily quota error patterns
+const RATE_LIMIT_PATTERNS = [
+  'rate limit', 'ratelimit', 'rate_limit',
+  'quota exceeded', 'daily limit', 'daily quota',
+  'too many requests', 'limit exceeded',
+  'x-ratelimit', 'requests per day',
+];
+
+function isRateLimitError(msg = '') {
+  const lower = msg.toLowerCase();
+  return RATE_LIMIT_PATTERNS.some(p => lower.includes(p));
+}
 
 function flattenContent(content) {
   if (typeof content === 'string') return content;
@@ -116,7 +129,6 @@ export default async function handler(req, res) {
     content: `You are LibreClaude, a helpful AI assistant. The user's name is ${username}. Be concise, accurate, and friendly.`,
   };
 
-  
   const validRoles = new Set(['user', 'assistant', 'system']);
   const apiMessages = [
     systemMsg,
@@ -148,6 +160,13 @@ export default async function handler(req, res) {
 
     if (!upstream.ok) {
       const errMsg = data?.error?.message || data?.error || `Error ${upstream.status}`;
+
+      // Detect daily / rate limit errors
+      if (upstream.status === 429 || isRateLimitError(errMsg)) {
+        writeLog(IS_LOCAL, { provider, model: modelId, status: 429, error: errMsg });
+        return res.status(429).json({ error: 'DAILY_LIMIT_REACHED' });
+      }
+
       writeLog(IS_LOCAL, { provider, model: modelId, status: upstream.status, error: errMsg });
       return res.status(upstream.status).json({ error: errMsg });
     }

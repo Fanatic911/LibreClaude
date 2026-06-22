@@ -1,11 +1,6 @@
 {
   "version": 2,
   "outputDirectory": ".",
-  "rewrites": [
-    { "source": "/api/chat",   "destination": "/api/chat.js" },
-    { "source": "/api/links",  "destination": "/api/links.js" },
-    { "source": "/api/config", "destination": "/api/config.js" }
-  ],
   "headers": [
     {
       "source": "/(.*)",

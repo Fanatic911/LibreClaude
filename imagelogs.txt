@@ -1,0 +1,44 @@
+[
+  {
+    "timestamp": "2026-06-22T02:34:53.467Z",
+    "endpoint": "api/image",
+    "model": "flux",
+    "prompt": "test",
+    "status": 200
+  },
+  {
+    "timestamp": "2026-06-22T02:35:00.990Z",
+    "endpoint": "api/image",
+    "model": "flux",
+    "prompt": "Chien",
+    "status": 200
+  },
+  {
+    "timestamp": "2026-06-22T02:35:17.085Z",
+    "endpoint": "api/image",
+    "model": "flux-realism",
+    "prompt": "Génére une photo d,un chien",
+    "status": 200
+  },
+  {
+    "timestamp": "2026-06-22T02:35:37.247Z",
+    "endpoint": "api/image",
+    "model": "turbo",
+    "prompt": "Apple",
+    "status": 200
+  },
+  {
+    "timestamp": "2026-06-22T02:39:14.122Z",
+    "endpoint": "api/image",
+    "model": "flux",
+    "prompt": "Génére une image de chien",
+    "status": 200
+  },
+  {
+    "timestamp": "2026-06-22T02:39:26.545Z",
+    "endpoint": "api/image",
+    "model": "flux",
+    "prompt": "Génére une image d'une pomme",
+    "status": 200
+  }
+]
