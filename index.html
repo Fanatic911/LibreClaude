@@ -30,6 +30,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700&family=Raleway:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="Source.css">
 
+  <!-- Syntax highlighting -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <script>
     const FALLBACK_LOGO_SVG = '<svg viewBox="0 0 24 24" fill="none" width="100%" height="100%"><path d="M12 2L20 7V17L12 22L4 17V7L12 2Z" stroke="#c9a84c" stroke-width="1.5" stroke-linejoin="round"/><circle cx="12" cy="12" r="2.5" fill="#c9a84c"/></svg>';
@@ -466,9 +470,9 @@
 
 <script>
 const GROQ_MODELS = [
+  { id: 'qwen/qwen3-32b',           label: 'Qwen 3 32B',      sub: 'Free · powerful code',  provider: 'Groq', badge: 'NEW' },
   { id: 'llama-3.3-70b-versatile',  label: 'Llama 3.3 70B',   sub: 'Versatile · powerful',  provider: 'Groq' },
   { id: 'llama-3.1-8b-instant',     label: 'Llama 3.1 8B',    sub: 'Fast · lightweight',    provider: 'Groq' },
-
   { id: 'openai/gpt-oss-20b',       label: 'GPT-OSS 20B',     sub: 'Efficient',             provider: 'Groq' },
   { id: 'openai/gpt-oss-120b',      label: 'GPT-OSS 120B',    sub: 'Reasoning · code',      provider: 'Groq' },
 ];
@@ -862,7 +866,8 @@ function makeModelOpt(m) {
   const div = document.createElement('div');
   div.className = 'model-opt' + (m.id === selectedModel ? ' selected' : '');
   div.dataset.id = m.id;
-  div.innerHTML = `<span class="opt-name">${m.label}</span><span class="opt-sub">${m.sub}</span>${m.id === selectedModel ? '<span class="opt-check">✓</span>' : ''}`;
+  const badge = m.badge ? `<span class="opt-badge">${m.badge}</span>` : '';
+  div.innerHTML = `<span class="opt-name">${m.label}${badge}</span><span class="opt-sub">${m.sub}</span>${m.id === selectedModel ? '<span class="opt-check">✓</span>' : ''}`;
   div.onclick = (e) => { e.stopPropagation(); selectModel(m); };
   return div;
 }
@@ -1069,22 +1074,122 @@ function saveMsg(role,text,files,apiContent) {
 
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-function renderAiText(text) {
-  const parts=String(text).split(/```(\w*)\n?([\s\S]*?)```/g); let out='';
-  for(let i=0;i<parts.length;i++){
-    if(i%3===0){ out+=esc(parts[i]).replace(/\n/g,'<br>'); }
-    else{
-      const lang=parts[i]||'text', code=parts[i+1].replace(/\n$/,'');
-      out+=`<div class="code-block"><div class="code-head"><span class="code-lang">${esc(lang)}</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div><pre><code>${esc(code)}</code></pre></div>`;
-      i++;
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function renderInline(text) {
+  return text
+    // Bold **text** or __text__
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/__(.+?)__/g, '<strong>$1</strong>')
+    // Italic *text* or _text_
+    .replace(/\*([^*\n]+?)\*/g, '<em>$1</em>')
+    .replace(/_([^_\n]+?)_/g, '<em>$1</em>')
+    // Inline code `code`
+    .replace(/`([^`\n]+?)`/g, '<code class="inline-code">$1</code>');
+}
+
+function renderAiText(rawText) {
+  const text = String(rawText);
+  // Split on fenced code blocks: ```lang\ncode```
+  const parts = text.split(/(```(\w*)\n?([\s\S]*?)```)/g);
+  // parts pattern: [before, fullMatch, lang, code, before, ...]
+  let out = '';
+  let i = 0;
+  while (i < parts.length) {
+    if (i % 4 === 0) {
+      // prose block — render markdown
+      out += renderProse(parts[i]);
+    } else if (i % 4 === 1) {
+      // full match — skip
+      const lang = parts[i + 1] || 'text';
+      const code = parts[i + 2] || '';
+      out += renderCodeBlock(lang, code);
+      i += 2; // skip lang+code
     }
+    i++;
   }
   return out;
 }
 
+function renderProse(text) {
+  if (!text.trim()) return '';
+  const lines = text.split('\n');
+  let html = '';
+  let inList = false;
+  let listType = '';
+
+  const flushList = () => {
+    if (inList) { html += `</${listType}>`; inList = false; listType = ''; }
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    // h3
+    if (/^### (.+)/.test(line)) {
+      flushList();
+      html += `<h3 class="ai-h3">${renderInline(escHtml(line.slice(4).trim()))}</h3>`;
+    // h2
+    } else if (/^## (.+)/.test(line)) {
+      flushList();
+      html += `<h2 class="ai-h2">${renderInline(escHtml(line.slice(3).trim()))}</h2>`;
+    // h1
+    } else if (/^# (.+)/.test(line)) {
+      flushList();
+      html += `<h1 class="ai-h1">${renderInline(escHtml(line.slice(2).trim()))}</h1>`;
+    // Unordered list
+    } else if (/^[-*+] (.+)/.test(line)) {
+      if (!inList || listType !== 'ul') { flushList(); html += '<ul class="ai-ul">'; inList = true; listType = 'ul'; }
+      html += `<li>${renderInline(escHtml(line.replace(/^[-*+] /, '')))}</li>`;
+    // Numbered list
+    } else if (/^\d+\. (.+)/.test(line)) {
+      if (!inList || listType !== 'ol') { flushList(); html += '<ol class="ai-ol">'; inList = true; listType = 'ol'; }
+      html += `<li>${renderInline(escHtml(line.replace(/^\d+\. /, '')))}</li>`;
+    // Empty line
+    } else if (line.trim() === '') {
+      flushList();
+      html += '<br>';
+    // Normal paragraph line
+    } else {
+      flushList();
+      html += renderInline(escHtml(line)) + '<br>';
+    }
+  }
+  flushList();
+  return html;
+}
+
+function renderCodeBlock(lang, code) {
+  const trimmed = code.replace(/\n$/, '');
+  let highlighted;
+  try {
+    if (lang && hljs.getLanguage(lang)) {
+      highlighted = hljs.highlight(trimmed, { language: lang }).value;
+    } else {
+      highlighted = hljs.highlightAuto(trimmed).value;
+    }
+  } catch {
+    highlighted = escHtml(trimmed);
+  }
+  const blockId = 'cb-' + Math.random().toString(36).slice(2, 8);
+  return `<div class="code-block" id="${blockId}">
+    <div class="code-head">
+      <span class="code-lang">${escHtml(lang || 'code')}</span>
+      <button class="code-copy" onclick="copyCode(this)">Copy</button>
+    </div>
+    <pre><code class="hljs language-${escHtml(lang)}">${highlighted}</code></pre>
+  </div>`;
+}
+
 function copyCode(btn){
-  navigator.clipboard.writeText(btn.parentElement.nextElementSibling.textContent).then(()=>{
-    const o=btn.textContent; btn.textContent='Copied!'; setTimeout(()=>btn.textContent=o,1200);
+  const pre = btn.closest('.code-block').querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent).then(()=>{
+    const o=btn.textContent; btn.textContent='Copied!';
+    btn.classList.add('copied');
+    setTimeout(()=>{ btn.textContent=o; btn.classList.remove('copied'); }, 1500);
   });
 }
 
@@ -1279,24 +1384,38 @@ async function sendMessage(){
     });
     rmTyping();
     if(!res.ok){
-      const e=await res.json().catch(()=>({})); const rawErr=(e.error||'').toLowerCase();
+      const e=await res.json().catch(()=>({}));
+      const rawErr=(e.error||'').toLowerCase();
       if(res.status===403){
         sessionStorage.removeItem(TS_TOKEN_KEY);
         sessionStorage.removeItem(TS_TOKEN_TIME_KEY);
-        turnstileToken=null;
       }
       let friendly;
-      if(res.status===403) friendly='Security check expired. Please try again.';
-      else if(res.status===429||rawErr.includes('rate')||rawErr.includes('limit')||rawErr.includes('quota')) friendly='Rate limit reached. Please wait a moment.';
+      if(e.error==='DAILY_LIMIT_REACHED'||res.status===429||rawErr.includes('rate')||rawErr.includes('limit')||rawErr.includes('quota')||rawErr.includes('daily')) {
+        const all=[...GROQ_MODELS,...GITHUB_MODELS];
+        const m=all.find(x=>x.id===selectedModel);
+        friendly=`Daily AI limit reached for ${m?m.label:'this model'} — please try again later.`;
+      }
+      else if(res.status===403) friendly='Security check expired. Please try again.';
       else if(res.status===401) friendly='Authentication error. Check your API key.';
       else if(res.status>=500) friendly='Server error. Please try again.';
       else friendly=e.error||('Error '+res.status);
       showError(friendly);
     } else {
-      const d=await res.json(); renderMsg('ai',d.content,[],true);
+      const d=await res.json();
+      renderMsg('ai',d.content,[],true);
+      // Auto-scroll to bottom after AI response
+      scrollToBottom();
     }
   } catch(err){ rmTyping(); showError('Unable to reach the server. Check your connection.'); }
   isLoading=false; refreshSend();
+}
+
+function scrollToBottom() {
+  const chatArea = document.getElementById('chat-area');
+  requestAnimationFrame(() => {
+    chatArea.scrollTop = chatArea.scrollHeight;
+  });
 }
 
 async function init() {

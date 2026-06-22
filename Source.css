@@ -1696,3 +1696,73 @@ body::after {
   from { transform: rotate(-180deg) scale(0.2); opacity: 0; }
   to   { transform: rotate(0deg) scale(1); opacity: 1; }
 }
+/* ── Sticky copy button ───────────────────────── */
+.code-block {
+  overflow: visible !important;   /* allow sticky to work */
+}
+.code-block pre {
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  overflow-x: auto;
+}
+.code-head {
+  position: sticky;
+  top: calc(var(--topbar-h) + 4px);
+  z-index: 4;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  /* keep existing bg + border-bottom from base CSS */
+}
+
+/* ── Highlight.js theme override (match dark gold palette) ── */
+.hljs {
+  background: transparent !important;
+  color: var(--text) !important;
+}
+.hljs-keyword, .hljs-selector-tag { color: #c9a84c !important; font-weight: 600; }
+.hljs-string, .hljs-attr          { color: #98c379 !important; }
+.hljs-number, .hljs-literal       { color: #e5c07b !important; }
+.hljs-comment                     { color: var(--text-muted) !important; font-style: italic; }
+.hljs-function .hljs-title,
+.hljs-title.function_             { color: #61afef !important; }
+.hljs-class .hljs-title,
+.hljs-title.class_                { color: #e2c97e !important; }
+.hljs-built_in                    { color: #56b6c2 !important; }
+.hljs-params                      { color: #d19a66 !important; }
+.hljs-variable                    { color: var(--text) !important; }
+
+/* Inline code */
+.inline-code {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: #e2c97e;
+}
+
+/* ── AI markdown elements ─────────────────────── */
+.ai-h1 { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--gold-light); margin: 12px 0 6px; }
+.ai-h2 { font-family: var(--font-display); font-size: 15px; font-weight: 600; color: var(--gold-light); margin: 10px 0 4px; }
+.ai-h3 { font-size: 14px; font-weight: 600; color: var(--text); margin: 8px 0 3px; }
+.ai-ul, .ai-ol { margin: 6px 0 6px 18px; padding: 0; }
+.ai-ul li, .ai-ol li { margin-bottom: 3px; line-height: 1.6; }
+.ai-ul { list-style-type: disc; }
+.ai-ol { list-style-type: decimal; }
+
+/* NEW badge on model option */
+.opt-badge {
+  display: inline-block;
+  margin-left: 5px;
+  padding: 1px 5px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border-radius: 3px;
+  background: rgba(201,168,76,0.18);
+  color: var(--gold);
+  border: 1px solid rgba(201,168,76,0.3);
+  vertical-align: middle;
+}
+
+/* Copy button copied state */
+.code-copy.copied { color: #98c379 !important; }
