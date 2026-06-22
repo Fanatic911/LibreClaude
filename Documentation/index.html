@@ -4,251 +4,1171 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LibreClaude — Documentation</title>
-  <link rel="icon" type="image/png" href="Icon.png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Raleway:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Raleway:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --bg:           #0d0d0b;
-      --gold:         #c9a84c;
-      --gold-light:   #e2c97e;
-      --text-muted:   #8a7d5a;
-      --text-faint:   #4a4535;
-      --font:         'Raleway', system-ui, sans-serif;
-      --font-display: 'Cinzel', serif;
-    }
+:root {
+  --bg:           #0d0d0b;
+  --bg-card:      #111110;
+  --bg-sidebar:   #0f0f0d;
+  --gold:         #c9a84c;
+  --gold-light:   #e2c97e;
+  --gold-dim:     rgba(201,168,76,0.15);
+  --gold-border:  rgba(201,168,76,0.18);
+  --text:         #e8e2d0;
+  --text-muted:   #8a7d5a;
+  --text-faint:   #4a4535;
+  --font:         'Raleway', system-ui, sans-serif;
+  --font-display: 'Cinzel', serif;
+  --font-mono:    'JetBrains Mono', monospace;
+  --nav-h:        56px;
+  --sidebar-w:    220px;
+}
 
-    html, body { height: 100%; overflow: hidden; }
+html { scroll-behavior: smooth; }
 
-    body {
-      font-family: var(--font);
-      background: var(--bg);
-      color: #e8e2d0;
-      font-size: 14px;
-      line-height: 1.6;
-      display: flex;
-    }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
 
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.5;
-    }
+/* ── Ambient noise ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+}
 
-    body::after {
-      content: '';
-      position: fixed;
-      bottom: -160px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 700px;
-      height: 320px;
-      background: radial-gradient(ellipse at center, rgba(201,168,76,0.07) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: 0;
-      animation: ambientPulse 6s ease-in-out infinite;
-    }
+body::after {
+  content: '';
+  position: fixed;
+  bottom: -160px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 320px;
+  background: radial-gradient(ellipse at center, rgba(201,168,76,0.06) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: ambientPulse 6s ease-in-out infinite;
+}
 
-    @keyframes ambientPulse {
-      0%, 100% { opacity: 0.6; transform: translateX(-50%) scaleX(1); }
-      50%       { opacity: 1;   transform: translateX(-50%) scaleX(1.08); }
-    }
+@keyframes ambientPulse {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1; }
+}
 
-    .uc-wrap {
-      position: relative;
-      z-index: 10;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100vh;
-      text-align: center;
-      padding: 24px;
-    }
+/* ── Nav ── */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  background: rgba(13,13,11,0.92);
+  border-bottom: 1px solid var(--gold-border);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  gap: 32px;
+  z-index: 100;
+}
 
-    .uc-badge {
-      font-family: var(--font-display);
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      color: var(--gold);
-      opacity: 0.5;
-      margin-bottom: 28px;
-      text-transform: uppercase;
-    }
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gold-light);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 
-    .uc-icon {
-      width: 72px;
-      height: 72px;
-      border-radius: 50%;
-      background: rgba(201,168,76,0.07);
-      border: 1px solid rgba(201,168,76,0.18);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 32px;
-      position: relative;
-    }
+.nav-logo img {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid var(--gold-border);
+}
 
-    .uc-icon::before {
-      content: '';
-      position: absolute;
-      inset: -6px;
-      border-radius: 50%;
-      border: 1px solid rgba(201,168,76,0.08);
-      animation: uc-ring-pulse 3s ease-in-out infinite;
-    }
+.nav-links {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  overflow: hidden;
+}
 
-    .uc-icon::after {
-      content: '';
-      position: absolute;
-      inset: -14px;
-      border-radius: 50%;
-      border: 1px solid rgba(201,168,76,0.04);
-      animation: uc-ring-pulse 3s ease-in-out infinite 0.6s;
-    }
+.nav-links a {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 0.2s;
+  white-space: nowrap;
+}
 
-    @keyframes uc-ring-pulse {
-      0%, 100% { opacity: 0.4; transform: scale(1); }
-      50%       { opacity: 1;   transform: scale(1.04); }
-    }
+.nav-links a:hover { color: var(--gold); }
 
-    .uc-icon img {
-      width: 40px;
-      height: 40px;
-      object-fit: cover;
-      border-radius: 50%;
-    }
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  color: var(--gold);
+  text-decoration: none;
+  border: 1px solid var(--gold-border);
+  border-radius: 5px;
+  padding: 7px 14px;
+  background: var(--gold-dim);
+  transition: background 0.2s, border-color 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 
-    .uc-title {
-      font-family: var(--font-display);
-      font-size: clamp(22px, 4vw, 34px);
-      font-weight: 700;
-      color: var(--gold-light);
-      letter-spacing: 0.05em;
-      margin-bottom: 12px;
-      animation: uc-fade-up 0.7s cubic-bezier(0.22,1,0.36,1) both;
-    }
+.nav-btn:hover {
+  background: rgba(201,168,76,0.12);
+  border-color: rgba(201,168,76,0.4);
+}
 
-    .uc-divider {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      justify-content: center;
-      margin-bottom: 18px;
-      animation: uc-fade-up 0.7s cubic-bezier(0.22,1,0.36,1) 0.1s both;
-    }
+/* ── Layout ── */
+.layout {
+  display: flex;
+  padding-top: var(--nav-h);
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
 
-    .uc-divider span {
-      display: block;
-      width: 40px;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(201,168,76,0.35));
-    }
+/* ── Sidebar ── */
+.sidebar {
+  position: fixed;
+  top: var(--nav-h);
+  left: 0;
+  width: var(--sidebar-w);
+  height: calc(100vh - var(--nav-h));
+  overflow-y: auto;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--gold-border);
+  padding: 28px 0 40px;
+  flex-shrink: 0;
+}
 
-    .uc-divider span:last-child {
-      background: linear-gradient(90deg, rgba(201,168,76,0.35), transparent);
-    }
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.15); border-radius: 2px; }
 
-    .uc-diamond {
-      color: var(--gold);
-      font-size: 8px;
-      opacity: 0.6;
-    }
+.sidebar-section { margin-bottom: 28px; }
 
-    .uc-subtitle {
-      font-family: var(--font);
-      font-size: clamp(13px, 2vw, 15px);
-      font-weight: 300;
-      color: var(--text-muted);
-      max-width: 380px;
-      line-height: 1.7;
-      margin-bottom: 40px;
-      animation: uc-fade-up 0.7s cubic-bezier(0.22,1,0.36,1) 0.18s both;
-    }
+.sidebar-label {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  padding: 0 20px 10px;
+}
 
-    .uc-subtitle em {
-      font-style: normal;
-      color: var(--gold);
-      font-weight: 400;
-    }
+.sidebar-link {
+  display: block;
+  padding: 7px 20px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+}
 
-    .uc-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-family: var(--font-display);
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      color: var(--gold);
-      text-decoration: none;
-      border: 1px solid rgba(201,168,76,0.25);
-      border-radius: 6px;
-      padding: 10px 22px;
-      background: rgba(201,168,76,0.05);
-      transition: background 0.2s, border-color 0.2s, color 0.2s;
-      animation: uc-fade-up 0.7s cubic-bezier(0.22,1,0.36,1) 0.28s both;
-    }
+.sidebar-link:hover {
+  color: var(--gold-light);
+  background: rgba(201,168,76,0.04);
+}
 
-    .uc-btn:hover {
-      background: rgba(201,168,76,0.1);
-      border-color: rgba(201,168,76,0.45);
-      color: var(--gold-light);
-    }
+.sidebar-link.active {
+  color: var(--gold);
+  border-left-color: var(--gold);
+  background: rgba(201,168,76,0.06);
+}
 
-    .uc-footer {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-family: var(--font-display);
-      font-size: 9px;
-      letter-spacing: 0.18em;
-      color: var(--text-faint);
-      white-space: nowrap;
-    }
+/* ── Main content ── */
+.content {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  min-width: 0;
+  padding: 48px 56px 80px;
+  max-width: 900px;
+}
 
-    @keyframes uc-fade-up {
-      from { opacity: 0; transform: translateY(14px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
+/* ── Section ── */
+.section { padding-bottom: 8px; }
+
+.section-badge {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--gold);
+  opacity: 0.55;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 700;
+  color: var(--gold-light);
+  letter-spacing: 0.04em;
+  margin-bottom: 14px;
+}
+
+.section-intro {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--text-muted);
+  max-width: 640px;
+  line-height: 1.75;
+  margin-bottom: 28px;
+}
+
+.section-text {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.75;
+  margin-bottom: 18px;
+  max-width: 640px;
+}
+
+.section-text a, .section-intro a {
+  color: var(--gold);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(201,168,76,0.25);
+  transition: border-color 0.2s;
+}
+
+.section-text a:hover, .section-intro a:hover {
+  border-color: var(--gold);
+}
+
+.sub-title {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  margin: 28px 0 12px;
+  text-transform: uppercase;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid rgba(201,168,76,0.1);
+  margin: 40px 0;
+}
+
+/* ── Cards ── */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  border-radius: 8px;
+  padding: 20px;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.card:hover {
+  border-color: rgba(201,168,76,0.35);
+  background: rgba(201,168,76,0.03);
+}
+
+.card-icon { font-size: 22px; margin-bottom: 10px; }
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--gold-light);
+  margin-bottom: 6px;
+}
+
+.card-desc {
+  font-size: 12px;
+  font-weight: 300;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ── Code blocks ── */
+.code-block {
+  background: #0a0a08;
+  border: 1px solid rgba(201,168,76,0.12);
+  border-radius: 7px;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.code-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 14px;
+  border-bottom: 1px solid rgba(201,168,76,0.1);
+  background: rgba(201,168,76,0.04);
+}
+
+.code-lang {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+}
+
+.code-copy {
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 4px;
+  padding: 3px 9px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  text-transform: uppercase;
+}
+
+.code-copy:hover {
+  color: var(--gold);
+  border-color: rgba(201,168,76,0.4);
+}
+
+.code-block pre {
+  padding: 16px 18px;
+  overflow-x: auto;
+}
+
+.code-block code {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: #c8b97a;
+  line-height: 1.65;
+}
+
+.inline-code {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: var(--gold);
+  background: rgba(201,168,76,0.08);
+  border: 1px solid rgba(201,168,76,0.15);
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
+/* ── Tables ── */
+.table-wrap {
+  overflow-x: auto;
+  margin-bottom: 24px;
+  border-radius: 8px;
+  border: 1px solid var(--gold-border);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+thead { background: rgba(201,168,76,0.06); }
+
+th {
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  text-transform: uppercase;
+  padding: 11px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--gold-border);
+}
+
+td {
+  padding: 10px 16px;
+  color: var(--text-muted);
+  border-bottom: 1px solid rgba(201,168,76,0.06);
+  vertical-align: middle;
+}
+
+tr:last-child td { border-bottom: none; }
+
+tbody tr:hover { background: rgba(201,168,76,0.025); }
+
+/* ── List ── */
+.list {
+  list-style: none;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.list li {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  padding-left: 18px;
+  position: relative;
+}
+
+.list li::before {
+  content: '◆';
+  position: absolute;
+  left: 0;
+  font-size: 6px;
+  color: var(--gold);
+  top: 5px;
+}
+
+/* ── Callout ── */
+.callout {
+  display: flex;
+  gap: 12px;
+  background: rgba(201,168,76,0.05);
+  border: 1px solid rgba(201,168,76,0.18);
+  border-left: 3px solid var(--gold);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+
+.callout-warn {
+  border-left-color: #c97c4c;
+  background: rgba(201,124,76,0.05);
+  border-color: rgba(201,124,76,0.2);
+  border-left-color: #c97c4c;
+}
+
+.callout-icon { font-size: 16px; flex-shrink: 0; line-height: 1.5; }
+
+.callout-text {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.65;
+}
+
+/* ── Endpoints ── */
+.endpoint {
+  background: var(--bg-card);
+  border: 1px solid var(--gold-border);
+  border-radius: 8px;
+  padding: 22px;
+  margin-bottom: 20px;
+}
+
+.endpoint-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.method {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  border-radius: 4px;
+  padding: 4px 9px;
+}
+
+.method.post {
+  background: rgba(76,201,120,0.12);
+  color: #6fcf97;
+  border: 1px solid rgba(76,201,120,0.2);
+}
+
+.method.get {
+  background: rgba(76,143,201,0.12);
+  color: #7ab8e8;
+  border: 1px solid rgba(76,143,201,0.2);
+}
+
+.endpoint-path {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--gold-light);
+}
+
+.param-title {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  margin: 16px 0 8px;
+}
+
+/* ── Badges ── */
+.badge-req {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: rgba(201,76,76,0.12);
+  color: #e08080;
+  border: 1px solid rgba(201,76,76,0.2);
+  text-transform: uppercase;
+}
+
+.badge-opt {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: rgba(201,168,76,0.08);
+  color: var(--text-muted);
+  border: 1px solid var(--gold-border);
+  text-transform: uppercase;
+}
+
+/* ── Changelog ── */
+.changelog-entry {
+  border: 1px solid var(--gold-border);
+  border-radius: 8px;
+  padding: 22px;
+  margin-bottom: 16px;
+  background: var(--bg-card);
+}
+
+.changelog-version {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--gold-light);
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.changelog-date {
+  font-size: 11px;
+  color: var(--text-faint);
+  margin-bottom: 16px;
+}
+
+.changelog-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.changelog-list li {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  line-height: 1.5;
+}
+
+.tag-new, .tag-fix, .tag-improve {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 2px 7px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.tag-new {
+  background: rgba(76,201,120,0.1);
+  color: #6fcf97;
+  border: 1px solid rgba(76,201,120,0.18);
+}
+
+.tag-fix {
+  background: rgba(201,76,76,0.1);
+  color: #e08080;
+  border: 1px solid rgba(201,76,76,0.18);
+}
+
+.tag-improve {
+  background: rgba(201,168,76,0.1);
+  color: var(--gold);
+  border: 1px solid var(--gold-border);
+}
+
+/* ── Community links ── */
+.links-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.link-card {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+  text-decoration: none;
+  border: 1px solid var(--gold-border);
+  border-radius: 7px;
+  padding: 10px 18px;
+  background: var(--gold-dim);
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.link-card:hover {
+  background: rgba(201,168,76,0.1);
+  border-color: rgba(201,168,76,0.4);
+}
+
+/* ── Footer ── */
+.footer {
+  margin-left: var(--sidebar-w);
+  padding: 16px 56px;
+  border-top: 1px solid rgba(201,168,76,0.08);
+  font-family: var(--font-display);
+  font-size: 9px;
+  letter-spacing: 0.18em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .content, .footer { margin-left: 0; padding-left: 20px; padding-right: 20px; }
+  .nav-links { display: none; }
+}
   </style>
 </head>
 <body>
-  <div class="uc-wrap">
-    <div class="uc-badge">EST. MMXXV · Fanatic Empire</div>
 
-    <div class="uc-icon">
-      <img src="Icon.png" alt="LibreClaude"/>
-    </div>
-
-    <h1 class="uc-title">Under Construction</h1>
-
-    <div class="uc-divider">
-      <span></span>
-      <span class="uc-diamond">◆</span>
-      <span></span>
-    </div>
-
-    <p class="uc-subtitle">
-      Documentation is <em>coming soon</em>.<br>
-      We are working hard to bring you a complete guide.
-    </p>
-
-    <a class="uc-btn" href="/">
-      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
-      Back to LibreClaude
+  <nav class="nav">
+    <a href="/" class="nav-logo">
+      <span>LibreClaude</span>
     </a>
+    <div class="nav-links">
+      <a href="#overview">Overview</a>
+      <a href="#installation">Installation</a>
+      <a href="#models">Models</a>
+      <a href="#api">API</a>
+      <a href="#environment">Environment</a>
+      <a href="#deployment">Deployment</a>
+    </div>
+    <a class="nav-btn" href="/">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
+      Back to App
+    </a>
+  </nav>
+
+  <div class="layout">
+
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Getting Started</div>
+        <a href="#overview" class="sidebar-link active">Overview</a>
+        <a href="#installation" class="sidebar-link">Installation</a>
+        <a href="#environment" class="sidebar-link">Environment Variables</a>
+        <a href="#deployment" class="sidebar-link">Deployment</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Features</div>
+        <a href="#models" class="sidebar-link">Supported Models</a>
+        <a href="#image-gen" class="sidebar-link">Image Generation</a>
+        <a href="#security" class="sidebar-link">Security</a>
+        <a href="#logging" class="sidebar-link">Local Logging</a>
+      </div>
+      <div class="sidebar-section">
+        <div class="sidebar-label">Reference</div>
+        <a href="#api" class="sidebar-link">API Endpoints</a>
+        <a href="#structure" class="sidebar-link">Project Structure</a>
+        <a href="#changelog" class="sidebar-link">Changelog</a>
+      </div>
+    </aside>
+
+    <main class="content">
+
+      <section id="overview" class="section">
+        <div class="section-badge">GETTING STARTED</div>
+        <h1 class="section-title">Overview</h1>
+        <p class="section-intro">LibreClaude is a free, open-source AI platform that brings together the best large language models and image generation tools into a single, unrestricted interface — with no subscriptions, no token limits, and no paywalls.</p>
+
+        <div class="cards">
+          <div class="card">
+            <div class="card-icon">⚡</div>
+            <div class="card-title">100% Free</div>
+            <div class="card-desc">No premium tiers, no hidden fees. All features are available to everyone by default.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">🧠</div>
+            <div class="card-title">Multi-Model</div>
+            <div class="card-desc">Switch between 18+ models from GitHub, Groq, and image generation providers.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">🎨</div>
+            <div class="card-title">Image Generation</div>
+            <div class="card-desc">Generate images using Pollinations.ai — free, no API key required, no limits.</div>
+          </div>
+          <div class="card">
+            <div class="card-icon">🔒</div>
+            <div class="card-title">Secure</div>
+            <div class="card-desc">All API keys are server-side only. Cloudflare Turnstile prevents bot abuse.</div>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <section id="installation" class="section">
+        <div class="section-badge">GETTING STARTED</div>
+        <h2 class="section-title">Installation</h2>
+        <p class="section-intro">LibreClaude runs on Vercel serverless functions. You can run it locally or deploy it to production in minutes.</p>
+
+        <h3 class="sub-title">Prerequisites</h3>
+        <ul class="list">
+          <li>Node.js v18 or higher</li>
+          <li>Vercel CLI: <code class="inline-code">npm install -g vercel</code></li>
+          <li>A Groq API key — <a href="https://console.groq.com" target="_blank">console.groq.com</a></li>
+          <li>A GitHub Personal Access Token — <a href="https://github.com/settings/tokens" target="_blank">github.com/settings/tokens</a></li>
+          <li>A Cloudflare Turnstile widget (free) — <a href="https://dash.cloudflare.com" target="_blank">dash.cloudflare.com</a></li>
+        </ul>
+
+        <h3 class="sub-title">Clone & Configure</h3>
+        <div class="code-block">
+          <div class="code-head">
+            <span class="code-lang">bash</span>
+            <button class="code-copy" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code>git clone https://github.com/Fanatic911/LibreClaude.git
+cd LibreClaude
+cp .env.example .env</code></pre>
+        </div>
+
+        <p class="section-text">Open <code class="inline-code">.env</code> and fill in your API keys. See the <a href="#environment">Environment Variables</a> section for details.</p>
+
+        <h3 class="sub-title">Run Locally</h3>
+        <div class="code-block">
+          <div class="code-head">
+            <span class="code-lang">bash</span>
+            <button class="code-copy" onclick="copyCode(this)">Copy</button>
+          </div>
+          <pre><code>vercel dev</code></pre>
+        </div>
+        <p class="section-text">The app will be available at <code class="inline-code">http://localhost:3000</code>. Local mode automatically loads your <code class="inline-code">.env</code> file and writes structured JSON logs.</p>
+      </section>
+
+      <div class="divider"></div>
+
+      <section id="models" class="section">
+        <div class="section-badge">FEATURES</div>
+        <h2 class="section-title">Supported Models</h2>
+        <p class="section-intro">LibreClaude routes requests to the appropriate provider automatically based on the model selected.</p>
+
+        <h3 class="sub-title">Groq Infrastructure</h3>
+        <p class="section-text">Groq provides ultra-fast inference with sub-second latency. Best for real-time conversations and rapid iteration.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Model</th><th>Model ID</th><th>Best For</th></tr></thead>
+            <tbody>
+              <tr><td>Qwen 3 32B</td><td><code class="inline-code">qwen/qwen3-32b</code></td><td>General purpose, strong reasoning</td></tr>
+              <tr><td>Llama 3.3 70B</td><td><code class="inline-code">llama-3.3-70b-versatile</code></td><td>Versatile everyday tasks</td></tr>
+              <tr><td>Llama 3.1 8B</td><td><code class="inline-code">llama-3.1-8b-instant</code></td><td>Ultra-fast lightweight responses</td></tr>
+              <tr><td>GPT-OSS 20B</td><td><code class="inline-code">openai/gpt-oss-20b</code></td><td>Efficient open-source tasks</td></tr>
+              <tr><td>GPT-OSS 120B</td><td><code class="inline-code">openai/gpt-oss-120b</code></td><td>Advanced reasoning and coding</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3 class="sub-title">GitHub Infrastructure</h3>
+        <p class="section-text">Microsoft-hosted models via GitHub Models inference. Includes flagship models from OpenAI, DeepSeek, Meta, Mistral, and more.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Model</th><th>Model ID</th><th>Best For</th></tr></thead>
+            <tbody>
+              <tr><td>Codestral</td><td><code class="inline-code">mistral-ai/Codestral-2501</code></td><td>Code generation and debugging</td></tr>
+              <tr><td>GPT-4o</td><td><code class="inline-code">openai/gpt-4o</code></td><td>Multimodal, versatile</td></tr>
+              <tr><td>GPT-4o mini</td><td><code class="inline-code">openai/gpt-4o-mini</code></td><td>Fast lightweight conversations</td></tr>
+              <tr><td>GPT-4.1</td><td><code class="inline-code">openai/gpt-4.1</code></td><td>Advanced coding workflows</td></tr>
+              <tr><td>GPT-4.1 mini</td><td><code class="inline-code">openai/gpt-4.1-mini</code></td><td>Rapid code generation</td></tr>
+              <tr><td>o1-mini</td><td><code class="inline-code">openai/o1-mini</code></td><td>Complex multi-step reasoning</td></tr>
+              <tr><td>DeepSeek R1</td><td><code class="inline-code">deepseek/DeepSeek-R1</code></td><td>State-of-the-art reasoning</td></tr>
+              <tr><td>DeepSeek V3</td><td><code class="inline-code">deepseek/DeepSeek-V3-0324</code></td><td>Clean, precise code</td></tr>
+              <tr><td>Llama 3.3 70B</td><td><code class="inline-code">meta/Llama-3.3-70B-Instruct</code></td><td>Instruction following</td></tr>
+              <tr><td>Llama 3.1 405B</td><td><code class="inline-code">meta/Meta-Llama-3.1-405B-Instruct</code></td><td>Massive scale comprehension</td></tr>
+              <tr><td>Mistral Large</td><td><code class="inline-code">mistral-ai/Mistral-Large-2411</code></td><td>Flagship European model</td></tr>
+              <tr><td>Phi-4</td><td><code class="inline-code">microsoft/Phi-4</code></td><td>Compact, smart, efficient</td></tr>
+              <tr><td>Grok 3</td><td><code class="inline-code">xai/grok-3</code></td><td>Bleeding-edge general use</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <section id="image-gen" class="section">
+        <div class="section-badge">FEATURES</div>
+        <h2 class="section-title">Image Generation</h2>
+        <p class="section-intro">LibreClaude v1.1 introduces built-in image generation powered by <strong>Pollinations.ai</strong> — completely free with no API key required and no hard rate limits.</p>
+
+        <h3 class="sub-title">How It Works</h3>
+        <p class="section-text">Select an image model from the model picker. Type your prompt and send. The backend (<code class="inline-code">api/image.js</code>) builds a Pollinations URL with your prompt and parameters, returns it to the frontend, and the browser loads the image directly.</p>
+
+        <h3 class="sub-title">Available Image Models</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Model</th><th>ID</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td>Flux</td><td><code class="inline-code">flux</code></td><td>High quality, default choice</td></tr>
+              <tr><td>Flux Realism</td><td><code class="inline-code">flux-realism</code></td><td>Photorealistic output</td></tr>
+              <tr><td>Flux Anime</td><td><code class="inline-code">flux-anime</code></td><td>Anime and illustration style</td></tr>
+              <tr><td>Flux 3D</td><td><code class="inline-code">flux-3d</code></td><td>3D render aesthetic</td></tr>
+              <tr><td>Turbo</td><td><code class="inline-code">turbo</code></td><td>Faster generation, slightly lower quality</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout">
+          <div class="callout-icon">💡</div>
+          <div class="callout-text">Image generation uses <code class="inline-code">img:</code> prefixed model IDs internally (e.g. <code class="inline-code">img:flux</code>). The frontend detects this prefix and routes the request to <code class="inline-code">/api/image</code> instead of <code class="inline-code">/api/chat</code>.</div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <section id="security" class="section">
+        <div class="section-badge">FEATURES</div>
+        <h2 class="section-title">Security</h2>
+
+        <h3 class="sub-title">Cloudflare Turnstile</h3>
+        <p class="section-text">Every chat and image request requires a valid Turnstile token. The token is validated server-side before any API call is made. In local development (<code class="inline-code">IS_LOCAL=TRUE</code>), Turnstile validation is bypassed automatically.</p>
+
+        <h3 class="sub-title">Server-Side API Keys</h3>
+        <p class="section-text">All API keys (Groq, GitHub Token) live exclusively in environment variables and are never sent to the client. The frontend only receives AI-generated content — never credentials.</p>
+
+        <div class="callout callout-warn">
+          <div class="callout-icon">⚠️</div>
+          <div class="callout-text">Never commit your <code class="inline-code">.env</code> file. It is listed in <code class="inline-code">.gitignore</code> by default. Use the Vercel dashboard to set environment variables in production.</div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <section id="logging" class="section">
+        <div class="section-badge">FEATURES</div>
+        <h2 class="section-title">Local Logging</h2>
+        <p class="section-intro">When running locally (<code class="inline-code">IS_LOCAL=TRUE</code>), LibreClaude writes structured JSON logs to help you debug and monitor activity. These files are excluded from Git.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>File</th><th>Contents</th></tr></thead>
+            <tbody>
+              <tr><td><code class="inline-code">logs.txt</code></td><td>All chat requests — provider, model, status, response size</td></tr>
+              <tr><td><code class="inline-code">configlogs.txt</code></td><td>Config endpoint calls — Turnstile key presence, local flag</td></tr>
+              <tr><td><code class="inline-code">imagelogs.txt</code></td><td>Image generation requests — model, prompt preview, status</td></tr>
+              <tr><td><code class="inline-code">PublishLogs.txt</code></td><td>Git deployment history from the Publish.py GUI tool</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="section-text">Each log file keeps a rolling maximum of 50 entries. Older entries are dropped automatically.</p>
+      </section>
+
+      <div class="divider"></div>
+
+      <section id="api" class="section">
+        <div class="section-badge">REFERENCE</div>
+        <h2 class="section-title">API Endpoints</h2>
+        <p class="section-intro">All endpoints live in the <code class="inline-code">api/</code> folder and are automatically served as Vercel serverless functions at <code class="inline-code">/api/*</code>.</p>
+
+        <div class="endpoint">
+          <div class="endpoint-head">
+            <span class="method post">POST</span>
+            <span class="endpoint-path">/api/chat</span>
+          </div>
+          <p class="section-text">Sends a conversation to the selected text model and returns the AI response.</p>
+          <h4 class="param-title">Request Body</h4>
+          <div class="code-block">
+            <div class="code-head"><span class="code-lang">json</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>{
+  "messages":       [{ "role": "user", "content": "Hello" }],
+  "model":          "openai/gpt-4o",
+  "username":       "User",
+  "turnstileToken": "..."
+}</code></pre>
+          </div>
+          <h4 class="param-title">Response</h4>
+          <div class="code-block">
+            <div class="code-head"><span class="code-lang">json</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>{ "content": "Hello! How can I help you today?" }</code></pre>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-head">
+            <span class="method post">POST</span>
+            <span class="endpoint-path">/api/image</span>
+          </div>
+          <p class="section-text">Returns a Pollinations.ai image URL for the given prompt and model.</p>
+          <h4 class="param-title">Request Body</h4>
+          <div class="code-block">
+            <div class="code-head"><span class="code-lang">json</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>{
+  "prompt":         "a golden sun over a dark forest",
+  "model":          "flux",
+  "width":          1024,
+  "height":         1024,
+  "turnstileToken": "..."
+}</code></pre>
+          </div>
+          <h4 class="param-title">Response</h4>
+          <div class="code-block">
+            <div class="code-head"><span class="code-lang">json</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>{
+  "url":    "https://image.pollinations.ai/prompt/...",
+  "prompt": "a golden sun over a dark forest"
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-head">
+            <span class="method get">GET</span>
+            <span class="endpoint-path">/api/config</span>
+          </div>
+          <p class="section-text">Returns public configuration consumed by the frontend on load.</p>
+          <h4 class="param-title">Response</h4>
+          <div class="code-block">
+            <div class="code-head"><span class="code-lang">json</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>{
+  "turnstileSiteKey": "0x4AAA...",
+  "isLocal": false
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-head">
+            <span class="method get">GET</span>
+            <span class="endpoint-path">/api/links</span>
+          </div>
+          <p class="section-text">Returns community links (Discord, GitHub) from environment variables.</p>
+          <h4 class="param-title">Response</h4>
+          <div class="code-block">
+            <div class="code-head"><span class="code-lang">json</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+            <pre><code>{
+  "discord": "https://discord.gg/...",
+  "github":  "https://github.com/..."
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <section id="environment" class="section">
+        <div class="section-badge">REFERENCE</div>
+        <h2 class="section-title">Environment Variables</h2>
+        <p class="section-intro">Copy <code class="inline-code">.env.example</code> to <code class="inline-code">.env</code> and fill in your values. In production, set these in the Vercel dashboard — never commit secrets.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Variable</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><code class="inline-code">GROQ_API_KEY</code></td><td><span class="badge-req">Yes</span></td><td>Groq API key from console.groq.com</td></tr>
+              <tr><td><code class="inline-code">GITHUB_TOKEN</code></td><td><span class="badge-req">Yes</span></td><td>GitHub PAT with Models access</td></tr>
+              <tr><td><code class="inline-code">TURNSTILE_SITE_KEY</code></td><td><span class="badge-req">Yes</span></td><td>Public Cloudflare Turnstile site key</td></tr>
+              <tr><td><code class="inline-code">TURNSTILE_SECRET_KEY</code></td><td><span class="badge-req">Yes</span></td><td>Secret Cloudflare Turnstile key (server-side only)</td></tr>
+              <tr><td><code class="inline-code">DISCORD_LINK</code></td><td><span class="badge-opt">Optional</span></td><td>Discord server invite URL</td></tr>
+              <tr><td><code class="inline-code">GITHUB_LINK</code></td><td><span class="badge-opt">Optional</span></td><td>GitHub repository URL</td></tr>
+              <tr><td><code class="inline-code">POLLINATIONS_REFERRAL</code></td><td><span class="badge-opt">Optional</span></td><td>Referral tag appended to Pollinations requests</td></tr>
+              <tr><td><code class="inline-code">IS_LOCAL</code></td><td><span class="badge-opt">Optional</span></td><td>Set to <code class="inline-code">TRUE</code> for local dev (enables logs, skips Turnstile)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <section id="deployment" class="section">
+        <div class="section-badge">REFERENCE</div>
+        <h2 class="section-title">Deployment</h2>
+
+        <h3 class="sub-title">Deploy to Vercel</h3>
+        <div class="code-block">
+          <div class="code-head"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>vercel --prod</code></pre>
+        </div>
+        <p class="section-text">Vercel automatically detects all files in the <code class="inline-code">api/</code> folder as serverless functions. The <code class="inline-code">outputDirectory: "."</code> in <code class="inline-code">vercel.json</code> tells Vercel to serve <code class="inline-code">index.html</code> from the root.</p>
+
+        <h3 class="sub-title">Using Publish.py</h3>
+        <p class="section-text">LibreClaude ships with a local Git deployment GUI (<code class="inline-code">Publish.py</code>). Run it with Python to get a simple interface for committing and pushing to GitHub with version tagging. It automatically fixes <code class="inline-code">.gitignore</code>, purges sensitive files from Git cache, and logs all deployments to <code class="inline-code">PublishLogs.txt</code>.</p>
+        <div class="code-block">
+          <div class="code-head"><span class="code-lang">bash</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>python Publish.py</code></pre>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <section id="structure" class="section">
+        <div class="section-badge">REFERENCE</div>
+        <h2 class="section-title">Project Structure</h2>
+        <div class="code-block">
+          <div class="code-head"><span class="code-lang">text</span><button class="code-copy" onclick="copyCode(this)">Copy</button></div>
+          <pre><code>LibreClaude/
+├── api/
+│   ├── chat.js          Text generation — routes to Groq or GitHub
+│   ├── config.js        Public config endpoint
+│   ├── image.js         Image generation via Pollinations.ai
+│   └── links.js         Community links endpoint
+├── Documentation/
+│   ├── index.html       This documentation page
+│   └── source.css       Documentation styles
+├── index.html           Main chat interface
+├── Source.css           Chat interface styles
+├── Icon.png             App icon (circular)
+├── vercel.json          Vercel config (outputDirectory, headers)
+├── package.json
+├── .env.example         Environment variable template
+├── .gitignore
+└── Publish.py           Git deployment GUI</code></pre>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <section id="changelog" class="section">
+        <div class="section-badge">REFERENCE</div>
+        <h2 class="section-title">Changelog</h2>
+
+        <div class="changelog-entry">
+          <div class="changelog-version">v1.1.0</div>
+          <div class="changelog-date">June 2026</div>
+          <ul class="changelog-list">
+            <li><span class="tag-new">New</span> Image generation — 5 Pollinations.ai models (Flux, Flux Realism, Flux Anime, Flux 3D, Turbo)</li>
+            <li><span class="tag-new">New</span> Dedicated <code class="inline-code">api/image.js</code> endpoint</li>
+            <li><span class="tag-new">New</span> Image section in the model picker with purple provider badge</li>
+            <li><span class="tag-new">New</span> Generating image… animated indicator while image loads</li>
+            <li><span class="tag-new">New</span> Separate <code class="inline-code">imagelogs.txt</code> for image request logging</li>
+            <li><span class="tag-fix">Fix</span> Vercel 404 in production — moved all JS into <code class="inline-code">api/</code> folder</li>
+            <li><span class="tag-fix">Fix</span> Model list appearing duplicated — <code class="inline-code">buildModelLists()</code> now clears lists before filling</li>
+            <li><span class="tag-fix">Fix</span> Copy button drifting down on long code blocks — <code class="inline-code">position: sticky</code></li>
+            <li><span class="tag-fix">Fix</span> Model menu resizing on scroll — fixed <code class="inline-code">400px</code> height</li>
+            <li><span class="tag-fix">Fix</span> Input locked after image generation — <code class="inline-code">isLoading</code> now resets properly</li>
+            <li><span class="tag-improve">Improved</span> App icon is now perfectly circular</li>
+            <li><span class="tag-improve">Improved</span> Full documentation site added at <code class="inline-code">/Documentation</code></li>
+          </ul>
+        </div>
+
+        <div class="changelog-entry">
+          <div class="changelog-version">v1.0.0</div>
+          <div class="changelog-date">June 2026</div>
+          <ul class="changelog-list">
+            <li><span class="tag-new">New</span> Initial public release</li>
+            <li><span class="tag-new">New</span> Dual-infrastructure routing — Groq and GitHub Models</li>
+            <li><span class="tag-new">New</span> 18 text models across both providers</li>
+            <li><span class="tag-new">New</span> Cloudflare Turnstile bot protection</li>
+            <li><span class="tag-new">New</span> Conversation history saved locally</li>
+            <li><span class="tag-new">New</span> File attachment support</li>
+            <li><span class="tag-new">New</span> Syntax-highlighted code blocks with copy button</li>
+            <li><span class="tag-new">New</span> Publish.py deployment GUI</li>
+            <li><span class="tag-new">New</span> Structured JSON local logging</li>
+          </ul>
+        </div>
+      </section>
+
+      <div class="divider"></div>
+
+      <section class="section">
+        <h2 class="section-title">Community & Support</h2>
+        <p class="section-intro">LibreClaude is built in public. Feedback, bug reports, and contributions are welcome.</p>
+        <div class="links-row">
+          <a class="link-card" href="https://discord.gg/6sExYntnc" target="_blank">
+            <span>💬</span>
+            <span>Discord</span>
+          </a>
+          <a class="link-card" href="https://github.com/Fanatic911/Libre-Claude" target="_blank">
+            <span>🐙</span>
+            <span>GitHub</span>
+          </a>
+          <a class="link-card" href="mailto:Contact@libreclaude.xyz">
+            <span>📧</span>
+            <span>Email</span>
+          </a>
+        </div>
+      </section>
+
+    </main>
   </div>
 
-  <div class="uc-footer">LIBRECLAUDE · DOCUMENTATION</div>
+  <footer class="footer">LibreClaude · Documentation · v1.1.0</footer>
+
+  <script>
+    function copyCode(btn) {
+      const code = btn.closest('.code-block').querySelector('code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        btn.textContent = 'Copied';
+        setTimeout(() => btn.textContent = 'Copy', 1800);
+      });
+    }
+
+    const links = document.querySelectorAll('.sidebar-link');
+    const sections = document.querySelectorAll('.section[id]');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          links.forEach(l => l.classList.remove('active'));
+          const active = document.querySelector(`.sidebar-link[href="#${e.target.id}"]`);
+          if (active) active.classList.add('active');
+        }
+      });
+    }, { threshold: 0.2 });
+    sections.forEach(s => observer.observe(s));
+  </script>
 </body>
 </html>
